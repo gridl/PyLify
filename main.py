@@ -2,7 +2,7 @@
 from requests import post
 from linkedin import linkedin
 from settings import config
-from sys import exit
+from sys import exit,argv
 import os
 import json
 import pickle
@@ -97,7 +97,7 @@ class OAuth(object):
 
 def main():
     parser = argparse.ArgumentParser(description=" \
-             Run LinkedIn operations from your Terminal. --help to know more")
+             Run LinkedIn operations from your Terminal.")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-m", "--me", help="Know about yourself",
                        action="store_true")
@@ -115,6 +115,9 @@ def main():
     args = parser.parse_args()  # parse the arguments
     user = OAuth()
     user = user.app
+    if len(argv) == 1:
+        parser.print_help()
+        # parser.print_usage()
     if args.me:
         print user.get_profile(selectors=['id', 'first-name', 'last-name',
                                           'location', 'distance',
