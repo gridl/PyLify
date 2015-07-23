@@ -10,10 +10,10 @@ import argparse
 import webbrowser
 import BaseHTTPServer
 
-resp = False
-at = ''     # auth token
-st = ''     # state
-http = {}
+RESP = False
+AT = ''     # auth token
+ST = ''     # state
+HTTP = {}
 
 
 def auth_token():
@@ -26,12 +26,12 @@ def auth_token():
     webbrowser.open(auth_url)
     server_class = BaseHTTPServer.HTTPServer
     httpd = server_class((config.HOST, config.PORT), authTokenHandler)
-    http[1] = httpd
+    HTTP[1] = httpd
     try:
         httpd.serve_forever()
     except:
         pass
-    if not resp:
+    if not RESP:
         httpd.server_close()
     return
 
@@ -41,15 +41,15 @@ class authTokenHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         pass
 
     def do_GET(s):
-        global at, st
+        global AT, ST
         url = s.requestline
         if 'code' in url:                           # parse the code params
             code = url.split('=')[1].split('&')[0]
             state = url.split('=')[2].split()
-            resp = True
-            if http[1]:
-                http[1].server_close()
-            at, st = code, state[0]
+            RESP = True
+            if HTTP[1]:
+                HTTP[1].server_close()
+            AT, ST = code, state[0]
         else:
             print url.error, url.error_description
         print "Fetching access token...Go ahead and close the browser tab!"
@@ -71,12 +71,12 @@ class OAuth(object):
         f.close()
         if not tk:
             auth_token()            # fetch authorization token
-            if st != config.STATE:
+            if ST != config.STATE:
                 print "CSRF Attack! Aborting.."
                 exit(1)
             data = {
                     'grant_type': 'authorization_code',
-                    'code': at,
+                    'code': AT,
                     'redirect_uri': config.REDIRECT_URL,
                     'client_id': config.CLIENT_ID,
                     'client_secret': config.CLIENT_SECRET
@@ -96,13 +96,47 @@ class OAuth(object):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=" \
+             Run LinkedIn operations from your Terminal. --help to know more")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-m", "--me", help="Know about yourself",
+                       action="store_true")
+    group.add_argument("-j", "--job", help="Job description", type=str)
+    group.add_argument("-C", "--company", help="Company description", type=str)
+    group.add_argument("-p", "--people",
+                       help="Name of the user to search", type=str)
+    group.add_argument("-c", "--connection", help="Name of the user whose \
+        connections are to be known", action="store_true")
+    group.add_argument("-s", "--share", help="Share stuffs", type=str)
+    group.add_argument("-i", "--invite", help="Send invitations", type=str)
+    group.add_argument("-g", "--group", help="Group posts", type=str)
+    group.add_argument("-b", "--bookmarks", help="Fetch your job bookmarks",
+                       type=str)
+    args = parser.parse_args()  # parse the arguments
     user = OAuth()
     user = user.app
-    print user.get_profile(selectors=['id', 'first-name', 'last-name',
-                                      'location', 'distance',
-                                      'num-connections',
-                                      'skills', 'educations'
-                                      ])
+    if args.me:
+        print user.get_profile(selectors=['id', 'first-name', 'last-name',
+                                          'location', 'distance',
+                                          'num-connections',
+                                          'skills', 'educations'
+                                          ])
+    elif args.job:
+        pass
+    elif args.company:
+        pass
+    elif args.people:
+        pass
+    elif args.connection:
+        pass
+    elif args.share:
+        pass
+    elif args.invite:
+        pass
+    elif args.group:
+        pass
+    elif args.bookmarks:
+        pass
 
 
 if __name__ == "__main__":
