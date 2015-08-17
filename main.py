@@ -2,7 +2,7 @@
 from requests import post
 from linkedin import linkedin
 from settings import config
-from sys import exit,argv
+from sys import exit, argv
 import os
 import json
 import pickle
